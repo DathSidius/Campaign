@@ -1,11 +1,29 @@
-<div align="center">
+# Моррион — Интерактивная карта мира
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Переработанная версия интерактивного атласа для настольных ролевых игр на базе **React + TypeScript + Leaflet + Express** с поддержкой **PostgreSQL** (или локального файлового хранилища при разработке).
 
-  <h1>Built with AI Studio</h2>
+## Что исправлено по сравнению с исходной версией
+- **Тайлы вынесены из Git** — в репозитории больше нет 513 МБ PNG-файлов. Сервер отдаёт тайлы из `public/tiles/` (если папка добавлена локально) либо проксирует с `TILES_BASE_URL` (CDN / S3 / R2).
+- **Включён 7-й уровень зума (`MAX_NATIVE_ZOOM: 7`)** — все 3 456 детальных тайлов теперь реально используются при приближении.
+- **Безопасная авторизация мастера** — убран захардкоженный PIN по умолчанию, добавлен rate limiting, HMAC-токены сессии и честная проверка ответа сервера (сетевая ошибка больше не открывает редактор).
+- **Точечный CRUD + оптимистичная блокировка (`version`)** — убрано опасное `DELETE FROM locations` при каждом сохранении; правки не затирают базу при сбое загрузки или одновременной работе.
+- **Защита от Stored XSS** — отказ от небезопасного `innerHTML` и inline `onclick`, строгий белый список MIME-типов (`PNG`, `JPEG`, `WebP`, `GIF`) и `Content-Security-Policy` на отдачу картинок.
+- **Починены иконки** — исправлены `fortress.png` и `tower.png`, подключены все 22 иконки из `public/icons/`.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Переменные окружения
+Скопируйте `.env.example` в `.env`:
+- `EDIT_PIN` — мастер-PIN для входа в режим редактирования (обязателен в production).
+- `SESSION_SECRET` — секрет для подписи токенов.
+- `DATABASE_URL` — строка подключения PostgreSQL (на ONREZA/RelaxDev подставляется автоматически; локально без неё данные сохраняются в `./data/`).
+- `TILES_BASE_URL` — базовый URL папки с тайлами карты.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+## Запуск
+```bash
+npm install
+npm run dev
+```
+Сборка и продакшн-запуск:
+```bash
+npm run build
+NODE_ENV=production npm start
+```
